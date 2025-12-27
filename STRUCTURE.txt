@@ -1,0 +1,88 @@
+pomme-dactu/
+│
+├── 🚀 FICHIERS DE DÉMARRAGE
+│   ├── START_HERE.md          ⭐ COMMENCE PAR ICI !
+│   ├── QUICKSTART.md           Guide démarrage rapide (20 min)
+│   ├── CHECKLIST.md            Checklist étape par étape
+│   └── NEXT_STEPS.md           Prochaines étapes après installation
+│
+├── 📚 DOCUMENTATION
+│   ├── README.md               Documentation complète
+│   ├── RESUME_PROJET.md        Vue d'ensemble technique
+│   ├── EXEMPLE_WORKFLOW.md     Exemple d'article complet
+│   └── TEMPLATE_ARTICLE.json   Format JSON pour Claude
+│
+├── 🌐 SITE WEB (Frontend)
+│   ├── index.html              Page d'accueil du blog
+│   ├── style.css               Design et styles
+│   ├── script.js               Chargement dynamique des articles
+│   └── articles/               Dossier des articles publiés
+│       ├── .gitkeep            (vide au départ)
+│       ├── index.json          (créé par publish_article.py)
+│       └── *.html              (articles générés)
+│
+├── 🐍 SCRIPTS PYTHON
+│   ├── find_question.py        Trouve la meilleure question du jour
+│   ├── publish_article.py      Publie un article généré par Claude
+│   └── requirements.txt        Dépendances Python (praw)
+│
+├── 🔧 CONFIGURATION
+│   ├── netlify.toml            Config déploiement Netlify
+│   ├── .gitignore              Fichiers à ignorer dans Git
+│   └── covered_questions.json  Historique questions traitées
+│
+├── 🛠️ UTILITAIRES
+│   └── daily.sh                Script helper pour routine quotidienne
+│
+└── 📁 Git
+    └── .git/                   Dépôt Git (caché)
+
+
+WORKFLOW QUOTIDIEN :
+====================
+
+1. python3 find_question.py
+   └─> Crée : daily_question.json
+
+2. Copier le prompt de daily_question.json
+   └─> Coller dans Claude
+   └─> Claude génère l'article JSON
+
+3. python3 publish_article.py
+   └─> Crée : articles/[slug].html
+   └─> Met à jour : articles/index.json
+   └─> Met à jour : covered_questions.json
+
+4. git add . && git commit && git push
+   └─> Netlify déploie automatiquement
+   └─> Site en ligne en ~30 secondes
+
+
+FICHIERS IMPORTANTS À CONFIGURER :
+===================================
+
+1. find_question.py (lignes 24-25)
+   ├─ client_id="TON_CLIENT_ID_ICI"
+   └─ client_secret="TON_CLIENT_SECRET_ICI"
+
+2. GitHub remote
+   └─ git remote add origin https://github.com/TON-USERNAME/pomme-dactu.git
+
+3. Netlify
+   └─ Connecter le repo GitHub
+
+
+FICHIERS GÉNÉRÉS AUTOMATIQUEMENT :
+===================================
+
+- daily_question.json         (par find_question.py, temporaire)
+- articles/index.json          (par publish_article.py)
+- articles/*.html              (par publish_article.py)
+- covered_questions.json       (mis à jour par publish_article.py)
+
+
+TAILLE TOTALE : ~45 KB (code source uniquement)
+DÉPENDANCES : Python 3 + praw
+HÉBERGEMENT : Netlify (gratuit)
+COÛT : 0€/mois
+TEMPS : 10 min/jour
