@@ -85,12 +85,19 @@ class BlogManager:
         choice = input("Choix (1-8) : ").strip()
         return choice
 
-    def find_question(self, source='trends'):
+    def find_question(self, source='reddit'):
         """Trouve une question"""
         self.show_header()
         print("🔍 Recherche d'une question...\n")
 
-        if source == 'trends':
+        if source == 'reddit':
+            print("Source : Reddit (vraies questions d'utilisateurs)")
+            print()
+            result = subprocess.run(
+                ['python3', 'find_question_reddit.py'],
+                capture_output=False
+            )
+        elif source == 'trends':
             print("Source : Google Trends (recherches réelles)")
             print()
             result = subprocess.run(
@@ -339,12 +346,18 @@ class BlogManager:
 
         # Étape 1 : Choisir la source
         print("Source des questions :")
-        print("1. Google Trends (recherches réelles)")
-        print("2. Questions pré-définies (fiable)")
+        print("1. Reddit (vraies questions d'utilisateurs) ⭐ RECOMMANDÉ")
+        print("2. Google Trends (tendances de recherche)")
+        print("3. Questions pré-définies (fiable)")
         print()
-        source_choice = input("Choix (1-2) : ").strip()
+        source_choice = input("Choix (1-3) : ").strip()
 
-        source = 'trends' if source_choice == '1' else 'simple'
+        if source_choice == '1':
+            source = 'reddit'
+        elif source_choice == '2':
+            source = 'trends'
+        else:
+            source = 'simple'
 
         # Étape 2 : Trouver une question
         print()
@@ -417,10 +430,16 @@ class BlogManager:
             if choice == '1':
                 self.show_header()
                 print("Source :")
-                print("1. Google Trends")
-                print("2. Questions pré-définies")
+                print("1. Reddit (recommandé)")
+                print("2. Google Trends")
+                print("3. Questions pré-définies")
                 src = input("Choix : ").strip()
-                source = 'trends' if src == '1' else 'simple'
+                if src == '1':
+                    source = 'reddit'
+                elif src == '2':
+                    source = 'trends'
+                else:
+                    source = 'simple'
                 self.find_question(source)
                 input("\nAppuie sur Entrée pour continuer...")
 
