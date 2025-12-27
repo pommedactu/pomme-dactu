@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+
+# Fichiers temporaires de workflow
+daily_question.json
+
+# Système
+.DS_Store
+*.swp
+*.swo
+
+# Ne pas ignorer covered_questions.json (on veut le tracker)
+# Ne pas ignorer articles/ (c'est le contenu du blog)
