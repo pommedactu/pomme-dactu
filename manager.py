@@ -196,8 +196,21 @@ class BlogManager:
         print("📤 Publication de l'article...\n")
 
         # Lire l'article
-        with open('article_draft.json', 'r', encoding='utf-8') as f:
-            article_data = json.load(f)
+        try:
+            with open('article_draft.json', 'r', encoding='utf-8') as f:
+                content = f.read()
+                # Essayer d'extraire le JSON si Claude a ajouté du texte avant/après
+                import re
+                json_match = re.search(r'\{.*\}', content, re.DOTALL)
+                if json_match:
+                    content = json_match.group(0)
+                article_data = json.loads(content)
+        except json.JSONDecodeError as e:
+            print(f"❌ Erreur de format JSON : {e}\n")
+            print("Le JSON de Claude n'est pas valide.")
+            print("Vérifie que tu as copié UNIQUEMENT le JSON, sans texte avant/après.\n")
+            input("Appuie sur Entrée pour continuer...")
+            return False
 
         print(f"Titre : {article_data['title']}")
         print()
