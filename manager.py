@@ -173,9 +173,44 @@ class BlogManager:
 
         response = '\n'.join(lines)
 
-        # Sauvegarder la réponse
-        with open('article_draft.json', 'w', encoding='utf-8') as f:
-            f.write(response)
+        # Nettoyer et valider le JSON
+        print()
+        print("🔧 Nettoyage et validation du JSON...")
+
+        try:
+            import re
+
+            # Extraire le JSON si Claude a ajouté du texte avant/après
+            json_match = re.search(r'\{.*\}', response, re.DOTALL)
+            if json_match:
+                response = json_match.group(0)
+
+            # Tester que c'est un JSON valide
+            article_data = json.loads(response)
+
+            # Vérifier les champs requis
+            required_fields = ['title', 'excerpt', 'content', 'keywords']
+            missing = [f for f in required_fields if f not in article_data]
+
+            if missing:
+                print(f"❌ Champs manquants : {', '.join(missing)}")
+                print("Réessaye en demandant à Claude d'inclure tous les champs.")
+                input("\nAppuie sur Entrée pour continuer...")
+                return False
+
+            # Sauvegarder la version nettoyée
+            with open('article_draft.json', 'w', encoding='utf-8') as f:
+                json.dump(article_data, f, ensure_ascii=False, indent=2)
+
+            print("✅ JSON valide et nettoyé !")
+            print(f"✅ Titre : {article_data['title']}")
+
+        except json.JSONDecodeError as e:
+            print(f"❌ Erreur JSON : {e}")
+            print("\nLe texte collé n'est pas un JSON valide.")
+            print("Assure-toi de copier UNIQUEMENT le JSON de Claude.")
+            input("\nAppuie sur Entrée pour continuer...")
+            return False
 
         print()
         print("✅ Article généré et sauvegardé !")
