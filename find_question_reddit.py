@@ -61,28 +61,64 @@ class RedditQuestionFinder:
         """Vérifie si c'est une vraie question technique"""
         title_lower = title.lower()
 
-        # Mots-clés indiquant un problème technique
+        # 1. FILTRER LES QUESTIONS VAGUES
+        # Mots qui rendent une question trop vague sans contexte
+        vague_indicators = [
+            'is this', 'is that', 'does this', 'does that',
+            'what is this', 'what is that', 'anyone else',
+            'anyone know', 'just me', 'normal?'
+        ]
+
+        # Rejeter si la question est vague
+        if any(indicator in title_lower for indicator in vague_indicators):
+            return False
+
+        # 2. LONGUEUR MINIMALE
+        # Les bonnes questions techniques sont généralement détaillées
+        if len(title) < 30:  # Moins de 30 caractères = trop court
+            return False
+
+        # 3. MOTS-CLÉS TECHNIQUES REQUIS
+        # Au moins un produit Apple doit être mentionné
+        apple_products = [
+            'iphone', 'ipad', 'mac', 'macbook', 'imac', 'airpods',
+            'apple watch', 'watch', 'apple tv', 'airtag', 'ios', 'macos'
+        ]
+
+        has_apple_product = any(product in title_lower for product in apple_products)
+        if not has_apple_product:
+            return False
+
+        # 4. MOTS-CLÉS INDIQUANT UN PROBLÈME TECHNIQUE
         problem_keywords = [
             'problème', 'problem', 'bug', 'erreur', 'error', 'crash',
             'ne fonctionne pas', 'not working', "doesn't work", "won't",
-            'comment', 'how to', 'how do', 'pourquoi', 'why',
-            'impossible', "can't", 'unable', 'help', 'aide',
-            'issue', 'broken', 'cassé', 'fix', 'repair'
+            'how to', 'how do i', 'how can', 'pourquoi', 'why',
+            "can't", 'unable', 'help', 'issue', 'broken', 'fix',
+            'overheating', 'heating', 'chauffe', 'slow', 'lent',
+            'battery', 'batterie', 'charging', 'charge',
+            'freeze', 'frozen', 'stuck', 'bloqué', 'lag', 'lagging'
         ]
 
-        # Exclure les posts non-techniques
+        # 5. EXCLURE LES POSTS NON-TECHNIQUES
         exclude_keywords = [
             'rumeur', 'rumor', 'leak', 'achat', 'buy', 'acheter',
-            'should i', 'dois-je', 'worth', 'vaut-il', 'price',
-            'deal', 'sale', 'promo', 'vs', 'or', 'which', 'better'
+            'should i buy', 'dois-je', 'worth', 'vaut-il', 'price',
+            'deal', 'sale', 'promo', ' vs ', ' or ', 'which one', 'better',
+            'upgrade', 'mise à jour', 'new release', 'announcement',
+            'foldable', 'pliable', 'expected', 'smaller', 'larger',
+            'may be', 'could be', 'might', 'future', 'coming',
+            'release date', 'sortie', 'prediction', 'expect',
+            'could launch', 'could still', 'next year', 'will be',
+            'rumored', 'reportedly', 'selon', 'according', 'sources say'
         ]
 
         # Vérifier exclusions
         if any(word in title_lower for word in exclude_keywords):
             return False
 
-        # Vérifier présence de mots-clés problème OU point d'interrogation
-        if any(word in title_lower for word in problem_keywords) or '?' in title:
+        # Vérifier présence de mots-clés problème
+        if any(word in title_lower for word in problem_keywords):
             return True
 
         return False
@@ -136,7 +172,27 @@ class RedditQuestionFinder:
             for post in posts:
                 if self.is_valid_question(post['title']):
                     # Calculer un score de pertinence
-                    relevance_score = (post['score'] * 2) + (post['num_comments'] * 3)
+                    base_score = (post['score'] * 2) + (post['num_comments'] * 3)
+
+                    # BONUS : Favoriser les problèmes techniques clairs
+                    title_lower = post['title'].lower()
+                    bonus = 0
+
+                    # +500 si commence par un mot-clé problème fort
+                    strong_problem_starts = ['my ', 'iphone ', 'mac ', 'macbook ', 'ipad ', 'airpods ']
+                    if any(title_lower.startswith(start) for start in strong_problem_starts):
+                        bonus += 500
+
+                    # +300 si contient des mots-clés de problème urgent
+                    urgent_keywords = ['not working', 'won\'t', 'can\'t', 'broken', 'error', 'crash', 'overheating']
+                    if any(keyword in title_lower for keyword in urgent_keywords):
+                        bonus += 300
+
+                    # +200 pour les questions "how to fix"
+                    if 'how to fix' in title_lower or 'how do i fix' in title_lower:
+                        bonus += 200
+
+                    relevance_score = base_score + bonus
 
                     all_questions.append({
                         'title': post['title'],
