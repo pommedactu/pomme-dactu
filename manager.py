@@ -185,6 +185,15 @@ class BlogManager:
             if json_match:
                 response = json_match.group(0)
 
+            # Nettoyer les caractères de contrôle problématiques
+            # Remplacer les espaces insécables et autres caractères invisibles
+            response = response.replace('\u00a0', ' ')  # Espace insécable
+            response = response.replace('\u202f', ' ')  # Espace fine insécable
+            response = response.replace('\u2009', ' ')  # Espace fine
+
+            # Supprimer les caractères de contrôle ASCII (sauf \n, \r, \t qui sont OK dans les strings)
+            response = ''.join(char if ord(char) >= 32 or char in '\n\r\t' else ' ' for char in response)
+
             # Tester que c'est un JSON valide
             article_data = json.loads(response)
 
