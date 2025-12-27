@@ -179,7 +179,7 @@ class ArticlePublisher:
             covered.append({
                 'question': daily['question']['title'],
                 'date': datetime.now().isoformat(),
-                'subreddit': daily['question']['subreddit']
+                'category': daily['question'].get('category', 'Apple')
             })
 
             # Sauvegarder
